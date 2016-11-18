@@ -56,12 +56,12 @@ class Minesweeper
       case input
       when 'Reveal'
         valid_input = true
-        puts "Choose a square to reveal."
+        puts "Choose a square to reveal. e.g. 0,1"
         position = get_position
         reveal(position)
       when 'Flag'
         valid_input = true
-        puts "Chosse a square to flag."
+        puts "Chosse a square to flag. e.g. 0,1"
         position = get_position
         flag(position)
       else
@@ -72,6 +72,23 @@ class Minesweeper
 
   def get_position
     ##Translates an input into a position array
+    valid_input = false
+    pos = nil
+    until valid_input
+      puts "Enter a valid input"
+      print ">"
+      input = gets.chomp
+
+      pos = input.split(",").map(&:to_i)
+
+      if pos[0] < rows && pos[1] < cols && pos.all? { |el| el >= 0 }
+        valid_input = true
+      else
+        puts "Not a valid input"
+      end
+    end
+
+    pos
   end
 
   def reveal(pos)
