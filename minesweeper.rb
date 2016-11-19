@@ -3,13 +3,13 @@ class Minesweeper
   attr_reader :grid, :rows, :cols, :bombs
   attr_accessor :game_over
 
-  def initialize
+  def initialize(rows = 9, cols = 9, bombs = 10)
     @game_over = false
-    @rows = 9
-    @cols = 9
+    @rows = rows
+    @cols = cols
     @grid = Array.new(@rows) { Array.new(@cols) }
     @display_grid = Array.new(@rows) { Array.new(@cols, "-") }
-    @bombs = 10
+    @bombs = bombs
     @bombs_found = 0
     seed_bombs
   end
@@ -202,9 +202,6 @@ class Minesweeper
   end
 end
 
-# test = Minesweeper.new
-# test[[0, 1]] = :B
-# p test.grid
-#
-# p Minesweeper.new.grid
-Minesweeper.new.run
+if __FILE__ == $PROGRAM_NAME
+  Minesweeper.new.run
+end
