@@ -8,8 +8,9 @@ class Minesweeper
     @rows = 9
     @cols = 9
     @grid = Array.new(@rows) { Array.new(@cols) }
-    @display_grid = Array.new(@rows) { Array.new(@cols, "-")}
+    @display_grid = Array.new(@rows) { Array.new(@cols, "-") }
     @bombs = 10
+    @bombs_found = 0
     seed_bombs
   end
 
@@ -41,11 +42,14 @@ class Minesweeper
 
   def run
     until game_over
-      ##Render board
+      render
       play_turn
+
+      @game_over = true if won?
     end
 
     ##Print end of game message
+    puts "You win!  You avoided all the bombs." if won?
     puts "Game over."
   end
 
@@ -59,7 +63,13 @@ class Minesweeper
         valid_input = true
         puts "Choose a square to reveal. e.g. 0,1"
         position = get_position
-        reveal(position)
+        if @display_grid[position[0]][position[1]] == :F
+          valid_input = false
+          puts "Can't reveal that square.  It has been flagged."
+        else
+          reveal(position)
+        end
+
       when 'Flag'
         valid_input = true
         puts "Choose a square to flag. e.g. 0,1"
@@ -70,6 +80,7 @@ class Minesweeper
           valid_input = false
           puts "Can't flag that square.  It has already been revealed."
         end
+
       else
         puts "That's not a valid choice."
       end
@@ -117,6 +128,7 @@ class Minesweeper
       change_display(pos, adjacent_bombs)
       ##Else reveal adjacent squares
       if adjacent_bombs == 0
+        change_display(pos, " ")
         adjacents.each do |square|
           row, col = square[0], square[1]
           reveal(square) if @display_grid[row][col] == "-"
@@ -127,6 +139,14 @@ class Minesweeper
 
   def flag(pos)
     ##Flags square indicated by pos
+    case @display_grid[pos[0]][pos[1]]
+    when :F
+      @display_grid[pos[0]][pos[1]] = "-"
+      @bombs_found += 1 if self[pos] == :B
+    when "-"
+      @display_grid[pos[0]][pos[1]] = :F
+      @bombs_found -= 1 if self[pos] == :B
+    end
   end
 
   def change_display(pos, value)
@@ -136,11 +156,14 @@ class Minesweeper
 
   def render
     ##Renders display grid to console.
-    print "  "
+    print "    "
     cols.times { |i| print "#{i} " }
     puts ""
+    print "    "
+    cols.times { |i| print i == (cols - 1) ? "-" : "--" }
+    puts ""
     @display_grid.each_with_index do |row, idx|
-      print "#{idx} "
+      print "#{idx} | "
       row.each do |tile|
         print "#{tile} "
       end
@@ -165,6 +188,17 @@ class Minesweeper
 
   def on_board?(pos)
     pos[0] < rows && pos[1] < cols && pos.all? { |el| el >= 0 }
+  end
+
+  def won?
+    not_revealed = 0
+    @display_grid.each do |row|
+      row.each do |tile|
+        not_revealed += 1 if tile == "-"
+      end
+    end
+
+    not_revealed + @bombs_found == @bombs
   end
 end
 
